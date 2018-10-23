@@ -1,0 +1,7 @@
+.project
+*.patch
+.idea/
+.DS_Store
+vendor/
+composer.lock
+test.php
