@@ -22,7 +22,7 @@ class Table{
         $t1 = microtime(true);
         foreach (range(1,500) as $a){
             $func = "get".$field;
-            if (is_callable([$this,$func])) {
+            if (method_exists($this,$func)) {
                 call_user_func([$this,$func]);
             }
         }
@@ -36,9 +36,9 @@ class Table{
         foreach (range(1,500) as $a) {
             $a = ['set.user' => 'getuser', 'get.user' => 'getuser'];
             $func = 'set.' . $field;
-            if (isset($a[$func])) {
+//            if (isset($a[$func])) {
                 call_user_func([$this, $a[$func]]);
-            }
+//            }
         }
         var_dump(microtime(true)-$t1);
     }
