@@ -1,9 +1,8 @@
 <?php
 
-use BadMethodCallException;
-
+namespace Hoooklife\DynamodbPodm\Query;
 /**
- * Class QueryBuilder
+ * Class DynamoDBBuilder
  *
  * @package BaoPham\DynamoDb\DynamoDb
  *
@@ -27,27 +26,28 @@ use BadMethodCallException;
  *
  * Common methods:
  *
- * @method QueryBuilder setExpressionAttributeNames(array $mapping)
- * @method QueryBuilder setExpressionAttributeValues(array $mapping)
- * @method QueryBuilder setFilterExpression(string $expression)
- * @method QueryBuilder setKeyConditionExpression(string $expression)
- * @method QueryBuilder setProjectionExpression(string $expression)
- * @method QueryBuilder setUpdateExpression(string $expression)
- * @method QueryBuilder setAttributeUpdates(array $updates)
- * @method QueryBuilder setConsistentRead(bool $consistent)
- * @method QueryBuilder setScanIndexForward(bool $forward)
- * @method QueryBuilder setExclusiveStartKey(mixed $key)
- * @method QueryBuilder setReturnValues(string $type)
- * @method QueryBuilder setRequestItems(array $items)
- * @method QueryBuilder setTableName(string $table)
- * @method QueryBuilder setIndexName(string $index)
- * @method QueryBuilder setSelect(string $select)
- * @method QueryBuilder setItem(array $item)
- * @method QueryBuilder setKeys(array $keys)
- * @method QueryBuilder setLimit(int $limit)
- * @method QueryBuilder setKey(array $key)
+ * @method DynamoDBBuilder setExpressionAttributeNames(array $mapping)
+ * @method DynamoDBBuilder setExpressionAttributeValues(array $mapping)
+ * @method DynamoDBBuilder setFilterExpression(string $expression)
+ * @method DynamoDBBuilder setKeyConditionExpression(string $expression)
+ * @method DynamoDBBuilder setProjectionExpression(string $expression)
+ * @method DynamoDBBuilder setUpdateExpression(string $expression)
+ * @method DynamoDBBuilder setAttributeUpdates(array $updates)
+ * @method DynamoDBBuilder setConsistentRead(bool $consistent)
+ * @method DynamoDBBuilder setScanIndexForward(bool $forward)
+ * @method DynamoDBBuilder setExclusiveStartKey(mixed $key)
+ * @method DynamoDBBuilder setReturnValues(string $type)
+ * @method DynamoDBBuilder setRequestItems(array $items)
+ * @method DynamoDBBuilder setTableName(string $table)
+ * @method DynamoDBBuilder setIndexName(string $index)
+ * @method DynamoDBBuilder setSelect(string $select)
+ * @method DynamoDBBuilder setItem(array $item)
+ * @method DynamoDBBuilder setKeys(array $keys)
+ * @method DynamoDBBuilder setLimit(int $limit)
+ * @method DynamoDBBuilder setKey(array $key)
  */
-class DynamoDBBuilder{
+class DynamoDBBuilder
+{
     /**
      * Query body to be sent to AWS
      *
@@ -57,7 +57,7 @@ class DynamoDBBuilder{
 
     /**
      * @param  string $method
-     * @param  array  $parameters
+     * @param  array $parameters
      * @return mixed
      */
     public function __call($method, $parameters)
@@ -72,5 +72,10 @@ class DynamoDBBuilder{
             static::class,
             $method
         ));
+    }
+
+    public function exec()
+    {
+
     }
 }

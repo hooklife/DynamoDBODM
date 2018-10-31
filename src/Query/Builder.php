@@ -1,15 +1,20 @@
 <?php
- 
+
 namespace Hoooklife\DynamodbPodm\Query;
+
 use Hoooklife\DynamodbPodm\DB;
 use Hoooklife\DynamodbPodm\Grammars\DynamoDBGrammar;
-class Builder{
+
+class Builder
+{
 
     /**
      * 查询排序
      */
     public $limit;
-    public $where;
+    public $wheres;
+    public $columns;
+    public $table;
 
 
     /**
@@ -25,18 +30,18 @@ class Builder{
     {
         switch (DB::$config[$connection]['driver']) {
             case "dynamedb":
-               $this->grammar = new DynamoDBGrammar();
-               break;
+                $this->grammar = new DynamoDBGrammar($this, DB::$config[$connection]);
+                break;
             default:
                 throw new Exception("bad driver");
-        }        
+        }
     }
 
 
     /**
      * 设置要查出的列
      *
-     * @param  array|mixed  $columns
+     * @param  array|mixed $columns
      * @return $this
      */
     public function select($columns = ['*'])
@@ -49,13 +54,13 @@ class Builder{
     /**
      * Add a new select column to the query.
      *
-     * @param  array|mixed  $column
+     * @param  array|mixed $column
      * @return $this
      */
     public function addSelect($columns)
     {
         $columns = is_array($columns) ? $columns : func_get_args();
-        $this->columns = array_merge((array) $this->columns, $columns);
+        $this->columns = array_merge((array)$this->columns, $columns);
         return $this;
     }
 
@@ -63,24 +68,23 @@ class Builder{
     /**
      * Set the table which the query is targeting.
      *
-     * @param  string  $table
+     * @param  string $table
      * @return $this
      */
     public function from($table)
     {
-        $this->from = $table;
+        $this->table = $table;
         return $this;
     }
-    
 
 
     /**
      * Add a basic where clause to the query.
      *
-     * @param  string|array|\Closure  $column
-     * @param  mixed   $operator
-     * @param  mixed   $value
-     * @param  string  $boolean
+     * @param  string|array|\Closure $column
+     * @param  mixed $operator
+     * @param  mixed $value
+     * @param  string $boolean
      * @return $this
      */
 
@@ -89,7 +93,7 @@ class Builder{
         if (is_array($column)) {
             // 递归
             foreach ($column as $key => $value) {
-                 if (is_numeric($key) && is_array($value)) {
+                if (is_numeric($key) && is_array($value)) {
                     $this->where(...array_values($value));
                 } else {
                     $this->where($key, '=', $value, $boolean);
@@ -99,13 +103,13 @@ class Builder{
             // return $this->addArrayOfWheres($column, $boolean);
         }
 
-        if(func_num_args() === 2 || $this->invalidOperator($operator)) {
+        if (func_num_args() === 2 || $this->invalidOperator($operator)) {
             list($value, $operator) = [$operator, '='];
         }
 
         // where in
-        if (is_array($value)){
-            return $this->whereIn($column,$boolean);
+        if (is_array($value)) {
+            return $this->whereIn($column, $boolean);
         }
 
         // is null
@@ -127,16 +131,16 @@ class Builder{
     }
 
 
-     /**
+    /**
      * Determine if the given operator is supported.
      *
-     * @param  string  $operator
+     * @param  string $operator
      * @return bool
      */
     protected function invalidOperator($operator)
     {
-        return ! in_array(strtolower($operator), $this->operators, true) &&
-               ! in_array(strtolower($operator), $this->grammar->getOperators(), true);
+        return !in_array(strtolower($operator), $this->operators, true) &&
+            !in_array(strtolower($operator), $this->grammar->getOperators(), true);
     }
 
 
@@ -175,7 +179,7 @@ class Builder{
     /**
      * Alias to set the "limit" value of the query.
      *
-     * @param  int  $value
+     * @param  int $value
      * @return \Illuminate\Database\Query\Builder|static
      */
     public function take($value)
@@ -187,7 +191,7 @@ class Builder{
     /**
      * Set the "limit" value of the query.
      *
-     * @param  int  $value
+     * @param  int $value
      * @return $this
      */
     public function limit($value)
@@ -199,11 +203,11 @@ class Builder{
         return $this;
     }
 
-     /**
+    /**
      * Set the limit and offset for a given page.
      *
-     * @param  int  $page
-     * @param  int  $perPage
+     * @param  int $page
+     * @param  int $perPage
      * @return \Illuminate\Database\Query\Builder|static
      */
     public function forPage($page, $perPage = 15)
@@ -212,7 +216,7 @@ class Builder{
     }
 
 
-     /**
+    /**
      * Get the SQL representation of the query.
      *
      * @return string
@@ -226,21 +230,20 @@ class Builder{
     /**
      * Get a single column's value from the first result of a query.
      *
-     * @param  string  $column
+     * @param  string $column
      * @return mixed
      */
     public function value($column)
     {
-        $result = (array) $this->first([$column]);
+        $result = (array)$this->first([$column]);
         return count($result) > 0 ? reset($result) : null;
     }
-
 
 
     /**
      * Execute the query and get the first result.
      *
-     * @param  array  $columns
+     * @param  array $columns
      * @return \Illuminate\Database\Eloquent\Model|object|static|null
      */
     public function first($columns = ['*'])
@@ -252,8 +255,8 @@ class Builder{
     /**
      * Execute the query as a "select" statement.
      *
-     * @param  array  $columns
-     * @return \Illuminate\Support\Collection
+     * @param  array $columns
+     * @return void
      */
     public function all($columns = ['*'])
     {
