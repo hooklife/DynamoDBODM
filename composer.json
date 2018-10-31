@@ -4,6 +4,11 @@
     "require": {
         "aws/aws-sdk-php": "^3.69"
     },
+     "autoload": {
+        "psr-4": {
+            "Hoooklife\\DynamodbPodm\\": "src/"
+        }
+    },
     "scripts": {
         "test": "./vendor/bin/phpunit -c phpunit.xml"
     }

@@ -3,7 +3,7 @@
 ## 多条与单条数据查询
 ```php
 // select * from post limit 1
-$result = Post::one();
+$result = Post::first();
 // select * from post
 $result = Post::all();
 // select * from post limit 10
