@@ -1,6 +1,9 @@
 <?php
 
-namespace Hoooklife\DynamodbPodm\Query;
+namespace Hoooklife\DynamodbPodm\Grammars;
+
+use Aws\DynamoDb\DynamoDbClient;
+
 /**
  * Class DynamoDBBuilder
  *
@@ -55,6 +58,40 @@ class DynamoDBBuilder
      */
     public $query = [];
 
+    protected $dynamodbClient;
+
+    public function __construct(array $config)
+    {
+        $this->dynamodbClient = new DynamoDbClient($config["S3Config"]);
+    }
+
+    public function hydrate(array $query)
+    {
+        $this->query = $query;
+        return $this;
+    }
+    public function setExpressionAttributeName($placeholder, $name)
+    {
+        $this->query['ExpressionAttributeNames'][$placeholder] = $name;
+        return $this;
+    }
+    public function setExpressionAttributeValue($placeholder, $value)
+    {
+        $this->query['ExpressionAttributeValues'][$placeholder] = $value;
+        return $this;
+    }
+
+
+    public function scan()
+    {
+        $this->dynamodbClient->scan($this->query);
+    }
+
+    public function query()
+    {
+        $this->dynamodbClient->query($this->query);
+    }
+
     /**
      * @param  string $method
      * @param  array $parameters
@@ -62,7 +99,7 @@ class DynamoDBBuilder
      */
     public function __call($method, $parameters)
     {
-        if (starts_with($method, 'set')) {
+        if (strpos($method, 'set') === 0) {
             $key = array_reverse(explode('set', $method, 2))[0];
             $this->query[$key] = current($parameters);
             return $this;
@@ -74,8 +111,5 @@ class DynamoDBBuilder
         ));
     }
 
-    public function exec()
-    {
 
-    }
 }
