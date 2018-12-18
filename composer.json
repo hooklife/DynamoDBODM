@@ -11,5 +11,8 @@
     },
     "scripts": {
         "test": "./vendor/bin/phpunit -c phpunit.xml"
+    },
+    "require-dev": {
+        "symfony/var-dumper": "^4.2"
     }
 }

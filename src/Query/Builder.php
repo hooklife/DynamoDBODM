@@ -2,6 +2,7 @@
 
 namespace Hoooklife\DynamodbPodm\Query;
 
+use Hoooklife\DynamodbPodm\Collection;
 use Hoooklife\DynamodbPodm\DB;
 use Hoooklife\DynamodbPodm\Grammars\DynamoDBGrammar;
 
@@ -12,7 +13,8 @@ class Builder
      * 查询排序
      */
     public $limit;
-    public $wheres;
+    public $wheres = [];
+    public $bindings = [];
     public $columns;
     public $table;
 
@@ -26,6 +28,13 @@ class Builder
         '=', '<', '>', '<=', '>=', '<>', '!='
     ];
 
+    public $reservedKey = [
+        'key'
+    ];
+
+    /** @var DynamoDBGrammar */
+    private $grammar;
+
     public function __construct($connection = 'default')
     {
         switch (DB::$config[$connection]['driver']) {
@@ -33,7 +42,7 @@ class Builder
                 $this->grammar = new DynamoDBGrammar($this, DB::$config[$connection]);
                 break;
             default:
-                throw new Exception("bad driver");
+                throw new \Exception("bad driver");
         }
     }
 
@@ -51,12 +60,6 @@ class Builder
     }
 
 
-    /**
-     * Add a new select column to the query.
-     *
-     * @param  array|mixed $column
-     * @return $this
-     */
     public function addSelect($columns)
     {
         $columns = is_array($columns) ? $columns : func_get_args();
@@ -117,7 +120,6 @@ class Builder
             return $this->whereNull($column, $boolean, $operator !== '=');
         }
 
-
         $type = 'Basic';
         $this->wheres[] = compact(
             'type', 'column', 'operator', 'value', 'boolean'
@@ -125,7 +127,7 @@ class Builder
 
 
         // TODO 参数绑定
-        // $this->addBinding($value, 'where');
+//         $this->addBinding($value, 'where');
 
         return $this;
     }
@@ -256,11 +258,21 @@ class Builder
      * Execute the query as a "select" statement.
      *
      * @param  array $columns
-     * @return void
+     * @return Collection
      */
-    public function all($columns = ['*'])
+    public function all($columns = ['*']): Collection
     {
-        return $this->grammar->all();
+        return $this->grammar->all($columns);
     }
+
+    /**
+     * @param array $data
+     * @return \Aws\Result
+     */
+    public function insert(array $data)
+    {
+        return $this->grammar->insert($data);
+    }
+
 
 }

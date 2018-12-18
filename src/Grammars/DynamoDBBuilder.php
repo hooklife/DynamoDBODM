@@ -30,9 +30,7 @@ use Aws\DynamoDb\DynamoDbClient;
  * Common methods:
  *
  * @method DynamoDBBuilder setExpressionAttributeNames(array $mapping)
- * @method DynamoDBBuilder setExpressionAttributeValues(array $mapping)
  * @method DynamoDBBuilder setFilterExpression(string $expression)
- * @method DynamoDBBuilder setKeyConditionExpression(string $expression)
  * @method DynamoDBBuilder setProjectionExpression(string $expression)
  * @method DynamoDBBuilder setUpdateExpression(string $expression)
  * @method DynamoDBBuilder setAttributeUpdates(array $updates)
@@ -40,7 +38,6 @@ use Aws\DynamoDb\DynamoDbClient;
  * @method DynamoDBBuilder setScanIndexForward(bool $forward)
  * @method DynamoDBBuilder setExclusiveStartKey(mixed $key)
  * @method DynamoDBBuilder setReturnValues(string $type)
- * @method DynamoDBBuilder setRequestItems(array $items)
  * @method DynamoDBBuilder setTableName(string $table)
  * @method DynamoDBBuilder setIndexName(string $index)
  * @method DynamoDBBuilder setSelect(string $select)
@@ -57,7 +54,9 @@ class DynamoDBBuilder
      * @var array
      */
     public $query = [];
+    public $batchWriteItem = [];
 
+    /** @var $dynamodbClient DynamoDbClient */
     protected $dynamodbClient;
 
     public function __construct(array $config)
@@ -70,26 +69,56 @@ class DynamoDBBuilder
         $this->query = $query;
         return $this;
     }
+
     public function setExpressionAttributeName($placeholder, $name)
     {
         $this->query['ExpressionAttributeNames'][$placeholder] = $name;
         return $this;
     }
+
     public function setExpressionAttributeValue($placeholder, $value)
     {
         $this->query['ExpressionAttributeValues'][$placeholder] = $value;
         return $this;
     }
 
+    public function setKeyConditionExpression($mapping)
+    {
+        if ($mapping) {
+            $this->query['KeyConditionExpression'] = $mapping;
+        }
+        return $this;
+    }
+
+    public function setExpressionAttributeValues($mapping)
+    {
+        if ($mapping) {
+            $this->query['ExpressionAttributeValues'] = $mapping;
+        }
+        return $this;
+    }
+
+    public function setRequestItems($items)
+    {
+        $this->batchWriteItem['RequestItems'] = $items;
+        return $this;
+    }
+
+    public function batchWriteItem()
+    {
+        var_dump($this->batchWriteItem);
+        return $this->dynamodbClient->batchWriteItem($this->batchWriteItem);
+    }
 
     public function scan()
     {
-        $this->dynamodbClient->scan($this->query);
+        return $this->dynamodbClient->scan($this->query);
     }
 
     public function query()
     {
-        $this->dynamodbClient->query($this->query);
+        var_dump($this->query);
+        return $this->dynamodbClient->query($this->query);
     }
 
     /**

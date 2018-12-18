@@ -8,11 +8,10 @@ class DB {
     {
         self::$config = $config;
     }
-    
+
     public static function table(string $table) {
         $query = new Builder();
         $query->from($table);
-
         return $query;
     }
     
