@@ -136,7 +136,7 @@ class DynamoDBGrammar
             ->setExpressionAttributeValues($this->parseExpressionAttributeValues())
             ->setProjectionExpression($this->parseProjectionExpression());
 
-        var_dump($builder->query);
+//        var_dump($builder->query);
         return new Collection($builder->query());
     }
 
