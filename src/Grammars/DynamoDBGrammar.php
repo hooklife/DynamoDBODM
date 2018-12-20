@@ -10,7 +10,9 @@ use Hoooklife\DynamodbPodm\Grammars\DynamoDBBuilder;
 
 class DynamoDBGrammar
 {
-    protected $operators = [];
+    protected $operators = [
+        'begins_with'
+    ];
 
     protected $params = [];
 
@@ -51,12 +53,20 @@ class DynamoDBGrammar
     private function parseKeyConditionExpression()
     {
         $expression = [];
+
         foreach ($this->builder->wheres as $index => $where) {
-            $expression[] = "{$where['column']} {$where['operator']} :{$index}";
+            switch (strtolower($where['operator'])){
+                case "begins_with":
+                    $expression[] = "begins_with({$where['column']}, :{$index})";
+                    break;
+                default:
+                    $expression[] = "{$where['column']} {$where['operator']} :{$index}";
+            }
+
             // param bind
             $this->attributeValues[':' . $index] = $where['value'];
         }
-        return implode("and", $expression);
+        return implode(" and ", $expression);
     }
 
     public function parseExpressionAttributeValues()
@@ -125,6 +135,8 @@ class DynamoDBGrammar
             ->setKeyConditionExpression($this->parseKeyConditionExpression())
             ->setExpressionAttributeValues($this->parseExpressionAttributeValues())
             ->setProjectionExpression($this->parseProjectionExpression());
+
+        var_dump($builder->query);
         return new Collection($builder->query());
     }
 
