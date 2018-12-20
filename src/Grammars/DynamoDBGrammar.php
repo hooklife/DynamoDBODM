@@ -68,7 +68,7 @@ class DynamoDBGrammar
     public function parseProjectionExpression()
     {
         if (reset($this->builder->columns) != '*') {
-            return implode(",", $this->columns);
+            return implode(",", $this->builder->columns);
         }
         return null;
     }
@@ -115,12 +115,16 @@ class DynamoDBGrammar
         }
     }
 
-    public function all($columns): Collection
+
+
+    public function all(): Collection
     {
+
         $builder = $this->dynamoDBBuilder
             ->setTableName($this->builder->table)
             ->setKeyConditionExpression($this->parseKeyConditionExpression())
-            ->setExpressionAttributeValues($this->parseExpressionAttributeValues());
+            ->setExpressionAttributeValues($this->parseExpressionAttributeValues())
+            ->setProjectionExpression($this->parseProjectionExpression());
         return new Collection($builder->query());
     }
 

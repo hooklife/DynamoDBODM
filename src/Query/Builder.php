@@ -48,27 +48,6 @@ class Builder
 
 
     /**
-     * 设置要查出的列
-     *
-     * @param  array|mixed $columns
-     * @return $this
-     */
-    public function select($columns = ['*'])
-    {
-        $this->columns = is_array($columns) ? $columns : func_get_args();
-        return $this;
-    }
-
-
-    public function addSelect($columns)
-    {
-        $columns = is_array($columns) ? $columns : func_get_args();
-        $this->columns = array_merge((array)$this->columns, $columns);
-        return $this;
-    }
-
-
-    /**
      * Set the table which the query is targeting.
      *
      * @param  string $table
@@ -262,7 +241,10 @@ class Builder
      */
     public function all($columns = ['*']): Collection
     {
-        return $this->grammar->all($columns);
+        $columns = is_array($columns) ? $columns : func_get_args();
+        $this->columns = $columns;
+
+        return $this->grammar->all();
     }
 
     /**

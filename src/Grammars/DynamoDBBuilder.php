@@ -31,7 +31,6 @@ use Aws\DynamoDb\DynamoDbClient;
  *
  * @method DynamoDBBuilder setExpressionAttributeNames(array $mapping)
  * @method DynamoDBBuilder setFilterExpression(string $expression)
- * @method DynamoDBBuilder setProjectionExpression(string $expression)
  * @method DynamoDBBuilder setUpdateExpression(string $expression)
  * @method DynamoDBBuilder setAttributeUpdates(array $updates)
  * @method DynamoDBBuilder setConsistentRead(bool $consistent)
@@ -90,6 +89,14 @@ class DynamoDBBuilder
         return $this;
     }
 
+    public function setProjectionExpression($expression)
+    {
+        if ($expression) {
+            $this->query['ProjectionExpression'] = $expression;
+        }
+        return $this;
+    }
+
     public function setExpressionAttributeValues($mapping)
     {
         if ($mapping) {
@@ -106,7 +113,7 @@ class DynamoDBBuilder
 
     public function batchWriteItem()
     {
-        var_dump($this->batchWriteItem);
+//        var_dump($this->batchWriteItem);
         return $this->dynamodbClient->batchWriteItem($this->batchWriteItem);
     }
 
@@ -117,7 +124,7 @@ class DynamoDBBuilder
 
     public function query()
     {
-        var_dump($this->query);
+//        var_dump($this->query);
         return $this->dynamodbClient->query($this->query);
     }
 
