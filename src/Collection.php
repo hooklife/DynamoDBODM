@@ -17,11 +17,16 @@ class Collection implements \ArrayAccess
     /** @var Result $data */
     private $data;
     private $marshaler;
+    /**
+     * @var bool
+     */
+    private $many;
 
-    public function __construct($data)
+    public function __construct($data, $many = true)
     {
         $this->data = $data;
 
+        $this->many = $many;
     }
 
     public function __get($var)
@@ -68,6 +73,14 @@ class Collection implements \ArrayAccess
 
     public function toArray()
     {
+        if (!isset($this->data["Items"]) || !$this->data["Items"]) {
+            return null;
+        }
+        if (!$this->many) {
+            return $this->getMarshaler()->unmarshalItem(
+                reset($this->data["Items"])
+            );
+        }
 
         $result = [];
         foreach ($this->data["Items"] as $item) {
@@ -76,9 +89,8 @@ class Collection implements \ArrayAccess
         return $result;
     }
 
-    public function first()
+    public function first(): Collection
     {
-        $item = reset($this->data["Items"]);
-        return $this->getMarshaler()->unmarshalItem($item);
+        return new Collection($this->data, false);
     }
 }
