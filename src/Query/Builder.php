@@ -216,8 +216,8 @@ class Builder
      */
     public function value($column)
     {
-        $result = (array)$this->first([$column]);
-        return count($result) > 0 ? reset($result) : null;
+        $result = $this->first([$column])->toArray();
+        return $result !== null ? reset($result) : null;
     }
 
 
@@ -231,8 +231,6 @@ class Builder
     {
         return $this->take(1)->all($columns)->first();
     }
-
-
 
 
     /**
