@@ -75,4 +75,10 @@ class Collection implements \ArrayAccess
         }
         return $result;
     }
+
+    public function first()
+    {
+        $item = reset($this->data["Items"]);
+        return $this->getMarshaler()->unmarshalItem($item);
+    }
 }

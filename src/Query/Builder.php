@@ -229,7 +229,7 @@ class Builder
      */
     public function first($columns = ['*'])
     {
-        return reset($this->take(1)->all($columns));
+        return $this->take(1)->all($columns)->first();
     }
 
 
