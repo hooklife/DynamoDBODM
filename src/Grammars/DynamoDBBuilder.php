@@ -3,6 +3,8 @@
 namespace Hoooklife\DynamodbPodm\Grammars;
 
 use Aws\DynamoDb\DynamoDbClient;
+use Hoooklife\DynamodbPodm\DynamoDB\ExecutableQuery;
+use Hoooklife\DynamodbPodm\DynamoDB\RawDynamoDbQuery;
 
 /**
  * Class DynamoDBBuilder
@@ -111,21 +113,13 @@ class DynamoDBBuilder
         return $this;
     }
 
-    public function batchWriteItem()
+    /**
+     * @return ExecutableQuery
+     */
+    public function prepare(): ExecutableQuery
     {
-//        var_dump($this->batchWriteItem);
-        return $this->dynamodbClient->batchWriteItem($this->batchWriteItem);
-    }
-
-    public function scan()
-    {
-        return $this->dynamodbClient->scan($this->query);
-    }
-
-    public function query()
-    {
-//        var_dump($this->query);
-        return $this->dynamodbClient->query($this->query);
+        $raw = new RawDynamoDbQuery(null, $this->query);
+        return new ExecutableQuery($this->dynamodbClient, $raw->finalize()->query);
     }
 
     /**

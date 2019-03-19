@@ -15,7 +15,6 @@ class DynamoDBGrammar
     ];
 
     protected $params = [];
-
     protected $insertParam = [];
 
     /**
@@ -27,9 +26,12 @@ class DynamoDBGrammar
      */
     private $config;
 
+    /** @var \Hoooklife\DynamodbPodm\Grammars\DynamoDBBuilder $dynamoDBBuilder */
     private $dynamoDBBuilder;
 
     private $attributeValues = [];
+    private $attributeNames = [];
+
 
     /** @var Marshaler $marshaler */
     private $marshaler;
@@ -54,17 +56,19 @@ class DynamoDBGrammar
     {
         $expression = [];
 
-        foreach ($this->builder->wheres as $index => $where) {
-            switch (strtolower($where['operator'])){
+        foreach ($this->builder->wheres as $valueIndex => $where) {
+            $columnIndex = count($this->attributeNames);
+            switch (strtolower($where['operator'])) {
                 case "begins_with":
-                    $expression[] = "begins_with({$where['column']}, :{$index})";
+                    $expression[] = "begins_with(#$columnIndex, :{$valueIndex})";
                     break;
                 default:
-                    $expression[] = "{$where['column']} {$where['operator']} :{$index}";
+                    $expression[] = "#$columnIndex {$where['operator']} :{$valueIndex}";
             }
 
             // param bind
-            $this->attributeValues[':' . $index] = $where['value'];
+            $this->attributeValues[':' . $valueIndex] = $where['value'];
+            $this->attributeNames['#' . $columnIndex] = $where['column'];
         }
         return implode(" and ", $expression);
     }
@@ -74,13 +78,18 @@ class DynamoDBGrammar
         return $this->marshaler->marshalItem($this->attributeValues);
     }
 
+
     // select
     public function parseProjectionExpression()
     {
-        if (reset($this->builder->columns) != '*') {
-            return implode(",", $this->builder->columns);
+        $tmp = [];
+        foreach ($this->builder->columns as $column) {
+            $index = count($this->attributeNames);
+            $this->attributeNames["#{$index}"] = $column;
+            $tmp[] = "#{$index}";
         }
-        return null;
+        return implode(",", $tmp);
+
     }
 
     // limit
@@ -126,7 +135,6 @@ class DynamoDBGrammar
     }
 
 
-
     public function all(): Collection
     {
 
@@ -134,11 +142,22 @@ class DynamoDBGrammar
             ->setTableName($this->builder->table)
             ->setKeyConditionExpression($this->parseKeyConditionExpression())
             ->setExpressionAttributeValues($this->parseExpressionAttributeValues())
-            ->setProjectionExpression($this->parseProjectionExpression());
-
-//        var_dump($builder->query);
-        return new Collection($builder->query());
+            ->setProjectionExpression($this->parseProjectionExpression())
+            ->setExpressionAttributeNames($this->attributeNames)
+            ->prepare()
+            ->query();
     }
 
+    public function delete()
+    {
+        $builder = $this->dynamoDBBuilder
+            ->setTableName($this->builder->table)
+            ->setExpressionAttributeValues($this->parseExpressionAttributeValues());
 
+    }
+
+    public function getBuilder()
+    {
+        return $this->dynamoDBBuilder;
+    }
 }

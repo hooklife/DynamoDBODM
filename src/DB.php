@@ -2,7 +2,7 @@
 
 namespace Hoooklife\DynamodbPodm;
 
-use Hoooklife\DynamodbPodm\Query\Builder;
+use Hoooklife\DynamodbPodm\DynamoDB\Builder;
 
 class DB
 {
